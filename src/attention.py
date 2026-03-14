@@ -12,3 +12,14 @@ def scaled_dot_product_attention(Q, K, V, mask=None):
 
     weights = softmax(scores)
     return weights @ V
+
+
+def init_attention_weights(d_model):
+    Wq = np.random.randn(d_model, d_model)
+    Wk = np.random.randn(d_model, d_model)
+    Wv = np.random.randn(d_model, d_model)
+    return Wq, Wk, Wv
+
+
+def project_qkv(X, Wq, Wk, Wv):
+    return X @ Wq, X @ Wk, X @ Wv
