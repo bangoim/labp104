@@ -18,3 +18,17 @@ def encoder_block(X, Wq, Wk, Wv, W1, b1, W2, b2, eps=1e-6):
     X = residual_add_norm(X, ffn_out, eps)
 
     return X
+
+
+def init_encoder_stack(n_layers, d_model, d_ff):
+    layers = []
+    for _ in range(n_layers):
+        block_weights = init_encoder_block(d_model, d_ff)
+        layers.append(block_weights)
+    return layers
+
+
+def encoder(X, layers):
+    for Wq, Wk, Wv, W1, b1, W2, b2 in layers:
+        X = encoder_block(X, Wq, Wk, Wv, W1, b1, W2, b2)
+    return X
