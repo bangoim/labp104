@@ -1,7 +1,9 @@
+import numpy as np
+
 from src.attention import scaled_dot_product_attention, init_attention_weights, project_qkv
 from src.ffn import feed_forward, init_ffn_weights
 from src.masks import create_causal_mask
-from src.utils import residual_add_norm
+from src.utils import softmax, residual_add_norm
 
 
 def decoder_masked_self_attention(Y, Wq, Wk, Wv, mask, eps=1e-6):
@@ -37,3 +39,22 @@ def decoder_block(Y, Z, self_attn_weights, cross_attn_weights, ffn_weights, eps=
     out = residual_add_norm(out, ffn_out, eps)
 
     return out
+
+
+def init_decoder_stack(n_layers, d_model, d_ff):
+    layers = []
+    for _ in range(n_layers):
+        block_weights = init_decoder_block(d_model, d_ff)
+        layers.append(block_weights)
+    return layers
+
+
+def decoder(Y, Z, layers, mask):
+    for self_attn_w, cross_attn_w, ffn_w in layers:
+        Y = decoder_block(Y, Z, self_attn_w, cross_attn_w, ffn_w)
+    return Y
+
+
+def output_projection(decoder_out, W_out):
+    logits = decoder_out @ W_out
+    return softmax(logits)
